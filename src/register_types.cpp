@@ -6,6 +6,8 @@
 #include <godot_cpp/godot.hpp>
 
 #include "example_class.h"
+#include "truncated_octahedron.h"
+#include "octahedral_voxel_chunk.h"
 
 using namespace godot;
 
@@ -15,6 +17,8 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 		return;
 	}
 	GDREGISTER_CLASS(ExampleClass);
+	GDREGISTER_CLASS(TruncatedOctahedron);
+	GDREGISTER_CLASS(OctahedralVoxelChunk);
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {

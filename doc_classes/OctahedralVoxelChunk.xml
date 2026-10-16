@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="OctahedralVoxelChunk" inherits="MeshInstance3D" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../godot-cpp/doc/class.xsd">
+    <brief_description>Chunk de voxels de octaedro truncado com geração em C++.</brief_description>
+    <description>Preenche o espaço com octaedros truncados em camadas alternadas. A malha é atualizada no editor e contém apenas faces externas. O chunk fica centralizado em X/Z e sua base fica em Y=0. Redimensionar regenera todos os voxels como sólidos. As dimensões são contagens de células, não unidades de mundo.</description>
+    <members>
+        <member name="size_x" type="int" setter="set_size_x" getter="get_size_x" default="8">Número de células por linha no eixo X, entre 1 e 64. Redimensionar preenche novamente o chunk.</member>
+        <member name="size_y" type="int" setter="set_size_y" getter="get_size_y" default="4">Número de camadas verticais, entre 1 e 64. Camadas ímpares são deslocadas em X/Z para encaixar as faces hexagonais.</member>
+        <member name="size_z" type="int" setter="set_size_z" getter="get_size_z" default="8">Número de células por linha no eixo Z, entre 1 e 64. Redimensionar preenche novamente o chunk.</member>
+        <member name="edge_length" type="float" setter="set_edge_length" getter="get_edge_length" default="0.5">Comprimento da aresta de cada octaedro em unidades de mundo. Altera a escala da malha sem alterar a quantidade de voxels.</member>
+        <member name="color" type="Color" setter="set_color" getter="get_color" default="Color(0.025, 0.25, 0.6, 1)">Cor base dos voxels.</member>
+        <member name="color_variation" type="float" setter="set_color_variation" getter="get_color_variation" default="0.18">Variação determinística de brilho por voxel. Zero deixa todos os voxels com a mesma cor.</member>
+        <member name="voxel_data" type="PackedByteArray" setter="set_voxel_data" getter="get_voxel_data">Ocupação salva com a cena. Índice: x + size_x * (z + size_z * y). Zero representa vazio e um representa sólido.</member>
+    </members>
+    <signals>
+        <signal name="mesh_rebuilt"><description>Emitido após atualizar a malha e suas estatísticas.</description></signal>
+    </signals>
+</class>

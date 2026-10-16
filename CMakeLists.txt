@@ -55,8 +55,11 @@ target_sources(${LIBNAME}
     PRIVATE
     src/register_types.cpp
     src/register_types.h
-    src/example_class.cpp
-    src/example_class.h
+    src/truncated_octahedron.cpp
+    src/truncated_octahedron.h
+    src/truncated_octahedron_geometry.h
+    src/octahedral_voxel_chunk.cpp
+    src/octahedral_voxel_chunk.h
 )
 
 # Fetch a list of the xml files to use for documentation and add to our target
