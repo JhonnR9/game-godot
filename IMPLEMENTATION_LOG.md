@@ -47,6 +47,9 @@
 - Criados materiais compartilhados para os oito IDs de bloco e shader nearest/repeat. O preview atual usa os três materiais que o gerador legado produz; os outros cinco já estão prontos para o catálogo completo.
 - Projeção extraída para `src/planar_uv.h`, comum ao payload C++ e ao adaptador. Testes verificam a mesma densidade UV em planos quadrado/hexagonal, continuidade periódica em chunks negativos/densos e UV por vértice. A cena Godot confirma materiais/texturas, superfícies, AO separado e contagem de triângulos; screenshot do preview foi inspecionado.
 - `bash test.sh` e `bash build.sh` passam, com smoke test Godot. **T04 concluída** para o renderer e os materiais catalogados.
+- Auditoria de imagem: os PNGs estavam em compressão VRAM com perda (`lossy_quality=0.7`) e mipmaps lineares ativados. Os oito imports foram reconfigurados para lossless e sem mipmaps; o shader mantém `filter_nearest, repeat_enable`. Smoke test confirma 64×64, zero mip levels e sampler nearest/repeat. Captura do preview foi inspecionada após reimportação.
+- Auditoria de upload: `triangle_count` acumulava as contagens entre regenerações e reportava índices CPU em vez dos índices presentes nos arrays aceitos pelo `ArrayMesh`. Agora é zerado a cada upload, conta os índices de cada superfície de volta do `ArrayMesh` e expõe triângulos descartados por dados inválidos. Teste cobre uploads repetidos e exige contagem igual, sem descartes; faceted=21.492 e conectado=50.770 no fixture-base.
+- `bash build.sh` e a suíte completa `bash test.sh` passaram após essas correções (2026-10-16).
 
 ## T05 — runtime de jobs e filas limitadas
 

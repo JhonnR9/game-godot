@@ -44,6 +44,7 @@ func run() -> void:
         check(ao_is_grayscale, "AO occupies a grayscale vertex channel separate from block albedo")
         check(renderer.mesh.surface_get_material(surface) is ShaderMaterial, "textured shared material assigned")
     check(uploaded_indices == renderer.get_triangle_count() * 3, "all material surfaces preserve triangle count")
+    check(renderer.get_dropped_triangle_count() == 0, "no CPU triangles dropped before ArrayMesh upload")
     var collision_node := renderer.get_node_or_null("TerrainCollisionBody/TerrainCollisionShape") as CollisionShape3D
     check(collision_node != null and collision_node.shape is ConcavePolygonShape3D, "collision adapter follows rendered terrain")
     if collision_node != null and collision_node.shape is ConcavePolygonShape3D:
@@ -65,6 +66,12 @@ func run() -> void:
     for block in ["grass", "dirt", "stone", "sand", "snow", "wood", "leaves", "bedrock"]:
         var block_material := load("res://materials/blocks/" + block + ".tres") as ShaderMaterial
         check(block_material != null and block_material.get_shader_parameter("albedo_texture") is Texture2D, block + " texture material loads")
+        if block_material != null:
+            var block_texture := block_material.get_shader_parameter("albedo_texture") as Texture2D
+            var block_image := block_texture.get_image()
+            check(block_image.get_width() == 64 and block_image.get_height() == 64, block + " stays at native pixel dimensions")
+            check(block_image.get_mipmap_count() == 0, block + " imports without blurry mip levels")
+            check(block_material.shader.code.contains("filter_nearest") and block_material.shader.code.contains("repeat_enable"), block + " samples nearest and repeats")
     var indices: PackedInt32Array = renderer.mesh.surface_get_arrays(0)[Mesh.ARRAY_INDEX]
     check(uploaded_indices == renderer.get_triangle_count() * 3, "actual uploaded triangles")
     var shaded_colors: PackedColorArray = renderer.mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
@@ -92,11 +99,13 @@ func run() -> void:
     await process_frame
     await process_frame
     check(renderer.get_voxel_data() == original, "surface joining preserves logical occupancy")
-    check(renderer.get_triangle_count() == 21492, "original faceted surface restored")
+    check(renderer.get_triangle_count() == 21492, "original faceted surface restored (%d triangles)" % renderer.get_triangle_count())
+    check(renderer.get_dropped_triangle_count() == 0, "faceted upload does not drop triangles")
     renderer.set("connect_aligned_surfaces", true)
     await process_frame
     await process_frame
-    check(renderer.get_triangle_count() == joined_triangles, "aligned connection switch rebuilds mesh")
+    check(renderer.get_triangle_count() == joined_triangles, "aligned connection switch rebuilds mesh (%d vs %d)" % [renderer.get_triangle_count(), joined_triangles])
+    check(renderer.get_dropped_triangle_count() == 0, "joined upload does not drop triangles")
     var rebuilds := [0]
     renderer.connect("mesh_rebuilt", func(): rebuilds[0] += 1)
     renderer.set("seed", 9821)

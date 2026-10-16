@@ -40,6 +40,7 @@ void TerrainChunkRenderer::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_voxel_count"), &TerrainChunkRenderer::get_voxel_count);
     ClassDB::bind_method(D_METHOD("get_visible_face_count"), &TerrainChunkRenderer::get_visible_face_count);
     ClassDB::bind_method(D_METHOD("get_triangle_count"), &TerrainChunkRenderer::get_triangle_count);
+    ClassDB::bind_method(D_METHOD("get_dropped_triangle_count"), &TerrainChunkRenderer::get_dropped_triangle_count);
     ClassDB::bind_method(D_METHOD("get_voxel_data"), &TerrainChunkRenderer::get_voxel_data);
     ADD_GROUP("Terrain Generation", "");
     ADD_PROPERTY(PropertyInfo(Variant::INT, "seed"), "set_seed", "get_seed");
@@ -127,20 +128,24 @@ void TerrainChunkRenderer::regenerate() {
         : std::vector<float>();
     apply_triangles(buffers);
     face_count=buffers.face_count;
-    triangle_count=int(buffers.indices.size()/3);
     dirty=false;
     emit_signal("mesh_rebuilt");
 }
 void TerrainChunkRenderer::apply_triangles(const terrain::MeshBuffers &buffers) {
+    triangle_count=0;
+    dropped_triangle_count=0;
     if (buffers.indices.empty()) {
         set_mesh(Ref<Mesh>());
         if(terrain_collision) terrain_collision->set_shape(Ref<Shape3D>());
+        triangle_count=0;
+        dropped_triangle_count=0;
         return;
     }
     std::array<PackedVector3Array,4> vertices,normals;
     std::array<PackedVector2Array,4> uvs;
     std::array<PackedColorArray,4> colors;
     std::array<PackedInt32Array,4> indices;
+    int accepted_triangles=0;
     constexpr double period=4.0*terrain::OctahedralLattice::SCALE;
     const terrain::Vec3 world_offset{
         double(chunk_coordinates.x)*64.0*terrain::OctahedralLattice::SCALE,
@@ -148,8 +153,17 @@ void TerrainChunkRenderer::apply_triangles(const terrain::MeshBuffers &buffers) 
         double(chunk_coordinates.z)*64.0*terrain::OctahedralLattice::SCALE};
     for(size_t tri=0;tri+2<buffers.indices.size();tri+=3) {
         const uint32_t source[3]={buffers.indices[tri],buffers.indices[tri+1],buffers.indices[tri+2]};
+        bool valid=true;
+        for(const uint32_t index:source)
+            valid&=index<buffers.positions.size() && index<buffers.normals.size() && index<buffers.materials.size();
+        if(!valid) { ++dropped_triangle_count; continue; }
         const size_t material=static_cast<size_t>(buffers.materials[source[0]]);
-        if(material>=vertices.size()) continue;
+        if(material==0 || material>=vertices.size() ||
+           buffers.materials[source[1]]!=buffers.materials[source[0]] ||
+           buffers.materials[source[2]]!=buffers.materials[source[0]]) {
+            ++dropped_triangle_count;
+            continue;
+        }
         const auto n0=buffers.normals[source[0]];
         const terrain::PlanarUVProjection projection(n0,world_offset,period);
         for(const uint32_t index:source) {
@@ -166,6 +180,7 @@ void TerrainChunkRenderer::apply_triangles(const terrain::MeshBuffers &buffers) 
             colors[material].append(Color(shade,shade,shade,1));
             indices[material].append(destination);
         }
+        ++accepted_triangles;
     }
     Ref<ArrayMesh> mesh;
     mesh.instantiate();
@@ -180,11 +195,15 @@ void TerrainChunkRenderer::apply_triangles(const terrain::MeshBuffers &buffers) 
         arrays[Mesh::ARRAY_INDEX]=indices[material];
         const int surface=mesh->get_surface_count();
         mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES,arrays);
+        const Array uploaded_arrays=mesh->surface_get_arrays(surface);
+        const PackedInt32Array uploaded_indices=uploaded_arrays[Mesh::ARRAY_INDEX];
+        triangle_count+=uploaded_indices.size()/3;
         const char *path=material_path(terrain::Voxel(material));
         Ref<Resource> resource=ResourceLoader::get_singleton()->load(path);
         Ref<Material> shared=resource;
         if(shared.is_valid()) mesh->surface_set_material(surface,shared);
     }
+    if(triangle_count<accepted_triangles) dropped_triangle_count+=accepted_triangles-triangle_count;
     set_mesh(mesh);
     if(terrain_collision) {
         Ref<ConcavePolygonShape3D> collision=mesh->create_trimesh_shape();
@@ -194,6 +213,7 @@ void TerrainChunkRenderer::apply_triangles(const terrain::MeshBuffers &buffers) 
 int TerrainChunkRenderer::get_voxel_count() const { return chunk.solid_count(); }
 int TerrainChunkRenderer::get_visible_face_count() const { return face_count; }
 int TerrainChunkRenderer::get_triangle_count() const { return triangle_count; }
+int TerrainChunkRenderer::get_dropped_triangle_count() const { return dropped_triangle_count; }
 PackedByteArray TerrainChunkRenderer::get_voxel_data() const {
     PackedByteArray data;
     data.resize(terrain::VoxelChunk::CAPACITY);

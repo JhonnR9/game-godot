@@ -20,6 +20,7 @@ class TerrainChunkRenderer : public MeshInstance3D {
     terrain::VoxelChunk chunk;
     int face_count = 0;
     int triangle_count = 0;
+    int dropped_triangle_count = 0;
     bool dirty = true;
     bool queued = false;
     StaticBody3D *terrain_body = nullptr;
@@ -46,6 +47,7 @@ public:
     int get_voxel_count() const;
     int get_visible_face_count() const;
     int get_triangle_count() const;
+    int get_dropped_triangle_count() const;
     PackedByteArray get_voxel_data() const;
 };
 } // namespace godot
