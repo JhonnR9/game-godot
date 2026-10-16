@@ -5,9 +5,8 @@
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
-#include "example_class.h"
 #include "truncated_octahedron.h"
-#include "octahedral_voxel_chunk.h"
+#include "terrain_chunk_renderer.h"
 
 using namespace godot;
 
@@ -16,9 +15,8 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
-	GDREGISTER_CLASS(ExampleClass);
 	GDREGISTER_CLASS(TruncatedOctahedron);
-	GDREGISTER_CLASS(OctahedralVoxelChunk);
+	GDREGISTER_CLASS(TerrainChunkRenderer);
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {

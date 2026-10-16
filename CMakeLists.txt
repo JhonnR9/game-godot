@@ -58,8 +58,40 @@ target_sources(${LIBNAME}
     src/truncated_octahedron.cpp
     src/truncated_octahedron.h
     src/truncated_octahedron_geometry.h
-    src/octahedral_voxel_chunk.cpp
-    src/octahedral_voxel_chunk.h
+    src/voxel_chunk.h
+    src/planar_uv.h
+    src/bridge_topology.h
+    src/gradient_noise.h
+    src/gradient_noise.cpp
+    src/terrain_generator.h
+    src/terrain_generator.cpp
+    src/octahedron_geometry.h
+    src/octahedron_geometry.cpp
+    src/chunk_mesher.h
+    src/ambient_occlusion.cpp
+    src/ambient_occlusion.h
+    src/surface_joiner.cpp
+    src/surface_joiner.h
+    src/chunk_mesher.cpp
+    src/terrain_chunk_renderer.h
+    src/terrain_chunk_renderer.cpp
+    src/world_types.h
+    src/core/world/world_repository.h
+    src/core/world/world_repository.cpp
+    src/core/world/dependency_stencil.h
+    src/core/world/dependency_stencil.cpp
+    src/core/geometry/surface_contracts.h
+    src/core/geometry/surface_contracts.cpp
+    src/core/geometry/surface_build_service.h
+    src/core/geometry/surface_build_service.cpp
+    src/core/geometry/convex_clipper.h
+    src/core/geometry/convex_clipper.cpp
+    src/core/geometry/picking_bvh.h
+    src/core/geometry/picking_bvh.cpp
+    src/core/runtime/job_scheduler.h
+    src/core/runtime/job_scheduler.cpp
+    src/core/runtime/surface_job_queue.h
+    src/core/runtime/surface_job_queue.cpp
 )
 
 # Fetch a list of the xml files to use for documentation and add to our target

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="TerrainChunkRenderer" inherits="MeshInstance3D">
+    <brief_description>Exibe um chunk lógico 16 × 16 × 16 gerado por seed e coordenadas.</brief_description>
+    <description>Adaptador do Godot: TerrainGenerator gera VoxelChunk em C++ puro; ChunkMesher monta os buffers usando OctahedronGeometry; este nó envia os triângulos para ArrayMesh. A malha é atualizada automaticamente no editor. O terreno usa ruído 2D global para a superfície e ruído 3D para cavernas. Apenas o chunk selecionado é mostrado, centralizado perto da origem.</description>
+    <members>
+        <member name="seed" type="int" setter="set_seed" getter="get_seed" default="1337">Seed determinística dos ruídos de superfície e cavernas. Pode ser negativa. A mesma seed e coordenada sempre regeneram os mesmos dados nesta versão do gerador.</member>
+        <member name="chunk_coordinates" type="Vector3i" setter="set_chunk_coordinates" getter="get_chunk_coordinates" default="Vector3i(0, 0, 0)">Coordenadas inteiras do chunk no mundo. Cada passo equivale a 16 células naquele eixo. Y=0 mostra a superfície; Y=-1 mostra o subsolo. Coordenadas negativas são suportadas. O chunk permanece próximo da origem para facilitar a inspeção.</member>
+        <member name="connect_aligned_surfaces" type="bool" setter="set_connect_aligned_surfaces" getter="get_connect_aligned_surfaces" default="true">Conecta os oito vértices internos de grupos 2×2 alinhados no topo, nas quatro laterais e embaixo, formando octógonos planos nas seis direções. As células isoladas, pontas e regiões irregulares preservam os polígonos e normais originais. Nenhum vértice original é suavizado ou deslocado.</member>
+        <member name="ambient_occlusion_strength" type="float" setter="set_ambient_occlusion_strength" getter="get_ambient_occlusion_strength" default="0.8">Intensidade da oclusão por vértice na malha final, após todas as conexões. Zero desativa. O sombreamento é gravado nas cores dos vértices, preservando a geometria e as normais facetadas.</member>
+        <member name="ambient_occlusion_radius" type="float" setter="set_ambient_occlusion_radius" getter="get_ambient_occlusion_radius" default="1.25">Alcance dos raios de oclusão, em unidades locais da malha. Raios maiores consideram paredes e tetos mais distantes. A amostragem usa 32 raios por combinação de posição e normal, acelerados por uma BVH dos triângulos finais.</member>
+    </members>
+    <signals>
+        <signal name="mesh_rebuilt"><description>Emitido depois de gerar dados, montar geometria e atualizar a malha.</description></signal>
+    </signals>
+</class>

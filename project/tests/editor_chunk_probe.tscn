@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3]
-[ext_resource type="Script" path="res://tests/editor_chunk_probe.gd" id="1"]
-[node name="EditorChunkProbe" type="Node3D"]
-script = ExtResource("1")
-[node name="Chunk" type="OctahedralVoxelChunk" parent="."]

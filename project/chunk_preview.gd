@@ -2,16 +2,16 @@
 extends Node3D
 
 var azimuth := 0.65
-var elevation := 0.55
+var elevation := 0.45
 var distance := 30.0
 var radius := 1.0
 var target := Vector3.ZERO
-@onready var chunk: MeshInstance3D = $Chunk
+@onready var renderer: MeshInstance3D = $TerrainRenderer
 @onready var camera: Camera3D = $Camera3D
 
 func _ready() -> void:
-    if not chunk.is_connected("mesh_rebuilt", refresh_chunk):
-        chunk.connect("mesh_rebuilt", refresh_chunk)
+    if not renderer.is_connected("mesh_rebuilt", refresh_chunk):
+        renderer.connect("mesh_rebuilt", refresh_chunk)
     refresh_chunk()
     if not Engine.is_editor_hint():
         for argument in OS.get_cmdline_user_args():
@@ -19,13 +19,19 @@ func _ready() -> void:
                 capture(argument.trim_prefix("--capture="))
 
 func refresh_chunk() -> void:
-    var size: Vector3i = chunk.get_chunk_size()
-    $CanvasLayer/Help.text = "CHUNK VOXEL · OCTAEDROS TRUNCADOS\n%d × %d × %d · %d voxels · %d faces visíveis · %d triângulos" % [size.x, size.y, size.z, chunk.get_voxel_count(), chunk.get_visible_face_count(), chunk.get_triangle_count()]
-    if chunk.mesh:
-        var bounds := chunk.get_aabb()
-        target = chunk.position + bounds.get_center()
+    var coordinates: Vector3i = renderer.get("chunk_coordinates")
+    var count: int = renderer.get_voxel_count()
+    $CanvasLayer/Help.text = "TERRENO PROCEDURAL · CHUNK 16 × 16 × 16\nSeed %d · coordenadas %s · %d voxels · %d triângulos" % [renderer.get("seed"), str(coordinates), count, renderer.get_triangle_count()]
+    if count == 0:
+        $CanvasLayer/Help.text += "\nRegião vazia — selecione Y = 0 para visualizar a superfície."
+    # Reset the frame even for an empty chunk; never keep stale previous bounds.
+    target = renderer.position + Vector3(0, 5.0, 0)
+    radius = 17.5
+    if renderer.mesh:
+        var bounds := renderer.get_aabb()
+        target = renderer.position + bounds.get_center()
         radius = maxf(bounds.size.length() * 0.5, 0.01)
-    distance = radius / sin(deg_to_rad(camera.fov * 0.5)) * 1.15
+    distance = radius / sin(deg_to_rad(camera.fov * 0.5)) * 1.08
     update_camera()
 
 func update_camera() -> void:
@@ -47,7 +53,7 @@ func _unhandled_input(event: InputEvent) -> void:
             distance = minf(radius * 20.0, distance * 1.1)
     elif event is InputEventKey and event.pressed and event.keycode == KEY_R:
         azimuth = 0.65
-        elevation = 0.55
+        elevation = 0.45
         refresh_chunk()
     update_camera()
 

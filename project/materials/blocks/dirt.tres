@@ -1,0 +1,8 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://materials/blocks/terrain_block.gdshader" id="1_shader"]
+[ext_resource type="Texture2D" path="res://textures/blocks/dirt.png" id="2_texture"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_texture = ExtResource("2_texture")

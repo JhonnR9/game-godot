@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://igvh8ouanflu"]
+
+[ext_resource type="Script" uid="uid://cifsotf868uwr" path="res://tests/editor_terrain_probe.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://c0ykvlbowmjai" path="res://487840302_1152103250291907_5882950638589308722_n.jpg" id="2_ulntq"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_do5ln"]
+albedo_texture = ExtResource("2_ulntq")
+
+[node name="EditorTerrainProbe" type="Node3D" unique_id=949596143]
+script = ExtResource("1")
+
+[node name="TerrainRenderer" type="TerrainChunkRenderer" parent="." unique_id=1496284743]
+seed = 1319
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.6930847, 6.9166975, -3.5761094)
+surface_material_override/0 = SubResource("StandardMaterial3D_do5ln")
